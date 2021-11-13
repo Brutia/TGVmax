@@ -1,5 +1,7 @@
 import * as config from 'config';
 import { isNil } from 'lodash';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 /**
  * Config class
@@ -122,7 +124,7 @@ export class Config {
 
   private getWhitelist = (): string => {
     if (process.env.NODE_ENV === 'production') {
-      return 'http://maxplorateur.fr';
+      return 'http://tgvmax-andres.ddns.net';
     } else {
       return 'http://localhost:8080';
     }

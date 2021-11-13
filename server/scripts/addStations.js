@@ -11,13 +11,19 @@ const stations = require('../data/stations.json');
 
   const collection = client.db('maxplorateur').collection('stations');
 
-  const bulk = collection.initializeUnorderedBulkOp();
+  const bulk = await collection.initializeUnorderedBulkOp();
 
   for (let station of stations) {
-    bulk.insert(station);
+    await bulk.insert(station);
   }
 
-  bulk.execute();
+  console.log('ici');
 
-  client.close();
+  await bulk.execute();
+
+  console.log('ici1');
+
+  await client.close();
+
+  console.log('ici2');
 })();

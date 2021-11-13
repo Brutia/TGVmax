@@ -159,7 +159,7 @@ class CronChecks {
   private readonly delay = async(ms: number): Promise<void> => {
     type IResolve = (value?: void | PromiseLike<void> | undefined) => void;
 
-    return new Promise((resolve: IResolve): number => setTimeout(resolve, ms));
+    return new Promise((resolve: IResolve): number => window.setTimeout(resolve, ms));
   }
 }
 

@@ -33,3 +33,5 @@ server/Dockerfile
 client/Dockerfile
 client/nginx
 init-letsencrypt.sh
+
+.vagrant
