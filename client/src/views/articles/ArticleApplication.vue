@@ -20,7 +20,7 @@
       <h2 class="headline">Vous avez un smartphone Android</h2>
       <v-img src="@/assets/android.png" class="mt-5"></v-img>
       <p class="mt-5">
-        Lorsque vous allez sur le site internet maxplorateur.fr avec votre
+        Lorsque vous allez sur le site internet tgvmax-andres.ddns.net avec votre
         smartphone, vous devriez voir apparaitre une bannière en bas de page :
         "Ajouter Maxplorateur à l'écran d'accueil". Il suffit de cliquer dessus,
         puis sur "Ajouter", et c'est bon !
@@ -29,7 +29,7 @@
       <h2 class="headline">Vous avez un iphone avec iOS11 ou plus</h2>
       <v-img src="@/assets/iphone.png" class="mt-5"></v-img>
       <p class="mt-5">
-        Vous devez vous rendre sur le site maxplorateur.fr en utilisant le
+        Vous devez vous rendre sur le site tgvmax-andres.ddns.net en utilisant le
         navigateur <span>Safari</span>. De là, cliquez sur l'icône "partager" en
         bas de page, descendez puis cliquez sur "Sur l'écran d'accueil". C'est
         installé !

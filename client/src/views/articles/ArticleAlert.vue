@@ -12,7 +12,7 @@
         Un billet TGVmax peut se libérer n'importe quand dans les 30 jours
         précédant le trajet. Les abonnés ont donc 2 possibilités : se connecter
         tous les jours sur oui.sncf pour vérifier la disponibilité, ou alors
-        mettre une alerte sur maxplorateur.fr ! Suivez le guide pour apprendre à
+        mettre une alerte sur tgvmax-andres.ddns.net ! Suivez le guide pour apprendre à
         créer votre première alerte.
       </p>
 
