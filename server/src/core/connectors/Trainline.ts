@@ -3,12 +3,12 @@ import { filter, get, isEmpty, isNil, map, uniq } from 'lodash';
 import * as moment from 'moment-timezone';
 import { randomUUID } from 'crypto'
 import Config from '../../Config';
-import { IAvailability, IConnectorParams, ISncfRawJourney, IJourney} from '../../types';
+import { IAvailability, IConnectorParams, ITrainlineRawJourney, IJourney, ITrainlineAlternative, ITrainlineSection} from '../../types';
 
 /**
- * Sncf connector
+ * Trainline connector
  */
-class Sncf {
+class Trainline {
   /**
    * connector generic function
    */
@@ -28,7 +28,7 @@ class Sncf {
   }
 
   /**
-   * get data from sncf api
+   * get data from trainline api
    */
   private readonly getTgvmaxHours = async({
     origin, destination, fromTime, toTime, tgvmaxNumber,
@@ -39,11 +39,9 @@ class Sncf {
     const departureMaxTime: string = moment(toTime).tz('Europe/Paris').format('YYYY-MM-DD[T]HH:mm:ss');
     try {
       while (keepSearching) {
-        
         var cookies: string[] | undefined = await Axios.request({
           method: "get",
-          url: Config.baseSncfUrl,
-          headers: Config.baseHeaders,
+          url: Config.baseTrainlineUrl,
         }).then(function(response: AxiosResponse): string[] | undefined{
           return response.headers['set-cookie'];
         });
@@ -54,62 +52,88 @@ class Sncf {
           }
           cookiesString = cookies.join(";");
         }
-
         var data: string = JSON.stringify({
-          "schedule": {
-            "outward": {
-              "date": departureMinTime+".000Z"
-            }
-          },
-          "mainJourney": {
-            "origin": {
-              "label": origin.name,
-              "id": origin.sncfId
-            },
-            "destination": {
-              "label": destination.name,
-              "id": destination.sncfId
-            }
-          },
-          "passengers": [
+          'passengers': [
             {
-              "discountCards": [{"code":"HAPPY_CARD","number":tgvmaxNumber,"label":"MAX JEUNE"}],
-              "typology": "YOUNG",
-              "withoutSeatAssignment": false,
-              "dateOfBirth":"1996-08-27"
+              'id': randomUUID(),
+              'dateOfBirth': "1996-08-27",
+              'cardIds': [
+                Config.trailineCardId
+              ]
             }
           ],
-          "itineraryId": randomUUID(),
-          "forceDisplayResults": true,
-          "trainExpected": true,
-          "strictMode": false,
-          "directJourney": false
+          'isEurope': true,
+          'cards': [
+            {
+              'id': Config.trailineCardId,
+              'cardTypeId': Config.trainlineTgvmaxId,
+              'number': tgvmaxNumber,
+              'uuid': Config.trailineCardId
+            }
+          ],
+          'transitDefinitions': [
+              {
+                  'direction': 'outward',
+                  'origin': origin.trainlineId,
+                  'destination': destination.trainlineId,
+                  'journeyDate': {
+                      'type': 'departAfter',
+                      'time': departureMinTime
+                  }
+              }
+          ],
+          'type': 'single',
+          'maximumJourneys': 5,
+          'includeRealtime': true,
+          'transportModes': [
+              'mixed'
+          ],
+          'directSearch': false,
+          'composition': [
+              'through'
+          ]
         });
         const headers: AxiosRequestHeaders = Object.assign({},Config.baseHeaders);
-        headers['x-bff-key'] = Config.sncfApiKey;
         headers['Cookie'] = cookiesString;
-        
-        var config: AxiosRequestConfig  = {
+        headers['x-version'] = "4.6.22225";
+        headers["origin"] = Config.baseTrainlineUrl;
+        const config: AxiosRequestConfig  = {
           method: 'post',
-          url: Config.baseSncfApiUrl,
+          url: Config.baseTrainlineApiUrl,
           headers: headers,
           data : data
         };
 
         /**
-         * get data from sncf.connect
+         * get data from trainline
          */
         const response: AxiosResponse = await Axios.request(config);
-        const rawPageJourneys: ISncfRawJourney[] = response.data.longDistance.proposals.proposals as unknown as ISncfRawJourney[];
+        const rawPageJourneys: ITrainlineRawJourney[] = Object.values(response.data.data.journeySearch.journeys) as unknown as ITrainlineRawJourney[];
+        const pageSections: ITrainlineSection[] = Object.values(response.data.data.journeySearch.sections) as unknown as ITrainlineSection[]
+        const pageAlternatives: ITrainlineAlternative[] = Object.values(response.data.data.journeySearch.alternatives) as unknown as ITrainlineAlternative[]
         const pageJourneys: IJourney[] = [];
-        Object.values(rawPageJourneys).forEach((rawJourney: ISncfRawJourney)=>{
-          if(rawJourney.status.isBookable){
-            const journey: IJourney = {departureDate: rawJourney.travelId.split("_")[0],
-                                       price: parseFloat(rawJourney.bestPriceLabel.slice(0,-2))};
-            pageJourneys.push(journey);
-          }
-
-        })
+        Object.values(rawPageJourneys).forEach((rawJourney: ITrainlineRawJourney)=>{
+          const sectionsId: string[] = rawJourney.sections;
+          var journeyPrice: number = 0;
+          sectionsId.forEach((sectionId: string) => {
+            const section: ITrainlineSection | undefined = pageSections.find(element => element.id == sectionId);
+            if(!isNil(section)){
+              const alternativesId: string[] = section.alternatives;
+              const minPrice: number = Math.min(...alternativesId.map((alternativeId: string) => {
+                const alternative: ITrainlineAlternative | undefined = pageAlternatives.find(element => element.id == alternativeId);
+                if(!isNil(alternative)){
+                  return alternative.price.amount;
+                }else{
+                  return Infinity;
+                }
+              }));
+              journeyPrice += minPrice;
+            }
+          });
+          const journey: IJourney = {departureDate: rawJourney.departAt,
+                                      price: journeyPrice};
+          pageJourneys.push(journey);
+        });
         results.push(...pageJourneys);
         var departureDate = pageJourneys[pageJourneys.length - 1].departureDate;
         const pageLastTripDeparture: string = moment(departureDate)
@@ -124,7 +148,7 @@ class Sncf {
       const status: number = get(error, 'response.status', ''); // tslint:disable-line
       const statusText: string = get(error, 'response.statusText', ''); // tslint:disable-line
       const label: string = get(error, 'response.data.label', ''); // tslint:disable-line
-      console.log(`SNCF API ERROR : ${status} ${statusText} ${label}`); // tslint:disable-line
+      console.log(`TRAINLINE API ERROR : ${status} ${statusText} ${label}`); // tslint:disable-line
     }
 
     /**
@@ -144,4 +168,4 @@ class Sncf {
 
 }
 
-export default new Sncf();
+export default new Trainline();

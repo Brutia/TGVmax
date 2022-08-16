@@ -18,6 +18,9 @@ class Notification {
         user: Config.email,
         pass: Config.password,
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
   }
 

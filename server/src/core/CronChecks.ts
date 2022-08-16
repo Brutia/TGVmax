@@ -1,4 +1,4 @@
-import { isEmpty, random } from 'lodash';
+import { isEmpty } from 'lodash';
 import * as moment from 'moment-timezone';
 import { ObjectId } from 'mongodb';
 import * as cron from 'node-cron';
@@ -7,7 +7,7 @@ import Notification from '../core/Notification';
 import Database from '../database/database';
 import { IAvailability, IConnector, IConnectorParams, ITravelAlert, IUser } from '../types';
 import Sncf from './connectors/Sncf';
-import Zeit from './connectors/Zeit';
+import Trainline from './connectors/Trainline';
 
 /**
  * Periodically check Tgvmax availability
@@ -27,19 +27,17 @@ class CronChecks {
   constructor() {
     this.connectors = [
       {
-        name: 'Zeit',
-        weight: 30,
+        name: 'Trainline',
         async isTgvmaxAvailable({
           origin, destination, fromTime, toTime, tgvmaxNumber,
         }: IConnectorParams): Promise<IAvailability> {
-          console.log(`${moment(new Date()).tz('Europe/Paris').format('DD-MM-YYYY HH:mm:ss')} - using zeit connector`); // tslint:disable-line
+          console.log(`${moment(new Date()).tz('Europe/Paris').format('DD-MM-YYYY HH:mm:ss')} - using trainline connector`); // tslint:disable-line
 
-          return Zeit.isTgvmaxAvailable({ origin, destination, fromTime, toTime, tgvmaxNumber });
+          return Trainline.isTgvmaxAvailable({ origin, destination, fromTime, toTime, tgvmaxNumber });
         },
       },
       {
         name: 'Sncf',
-        weight: 70,
         async isTgvmaxAvailable({
           origin, destination, fromTime, toTime, tgvmaxNumber,
         }: IConnectorParams): Promise<IAvailability> {
@@ -68,15 +66,41 @@ class CronChecks {
          * Send notification if tgvmax seat is available
          */
         for (const travelAlert of travelAlerts) {
+          
+          for (const connector of this.connectors){
+            var availability = await connector.isTgvmaxAvailable({ // tslint:disable-line
+              origin: travelAlert.origin,
+              destination: travelAlert.destination,
+              fromTime: travelAlert.fromTime,
+              toTime: travelAlert.toTime,
+              tgvmaxNumber: travelAlert.tgvmaxNumber,
+            });
+            if(!availability.isTgvmaxAvailable){
+              continue; // if no TGVmax seat is found, we try another connector
+            }
 
-          const selectedConnector: IConnector = this.getConnector();
-          const availability: IAvailability = await selectedConnector.isTgvmaxAvailable({ // tslint:disable-line
-            origin: travelAlert.origin,
-            destination: travelAlert.destination,
-            fromTime: travelAlert.fromTime,
-            toTime: travelAlert.toTime,
-            tgvmaxNumber: travelAlert.tgvmaxNumber,
-          });
+            /**
+             * if is TGVmax is available : send email
+             */
+            console.log(`${moment(new Date()).tz('Europe/Paris').format('DD-MM-YYYY HH:mm:ss')} - travelAlert ${travelAlert._id} triggered`); // tslint:disable-line
+            const email: string = await this.fetchEmailAddress(travelAlert.userId);
+            await Notification.sendEmail(
+              email,
+              travelAlert.origin.name,
+              travelAlert.destination.name,
+              travelAlert.fromTime,
+              availability.hours,
+            );
+            /**
+             * update travelALert status
+             */
+            await Database.updateOne('alerts', { _id: new ObjectId(travelAlert._id) }, {
+              $set: { status: 'triggered', triggeredAt: new Date() },
+            },
+            );
+            await this.delay(Config.delay);
+            break;
+          }
 
           if (!availability.isTgvmaxAvailable) {
             await Database.updateOne(
@@ -85,27 +109,6 @@ class CronChecks {
             await this.delay(Config.delay);
             continue;
           }
-
-          /**
-           * if is TGVmax is available : send email
-           */
-          console.log(`${moment(new Date()).tz('Europe/Paris').format('DD-MM-YYYY HH:mm:ss')} - travelAlert ${travelAlert._id} triggered`); // tslint:disable-line
-          const email: string = await this.fetchEmailAddress(travelAlert.userId);
-          await Notification.sendEmail(
-            email,
-            travelAlert.origin.name,
-            travelAlert.destination.name,
-            travelAlert.fromTime,
-            availability.hours,
-          );
-          /**
-           * update travelALert status
-           */
-          await Database.updateOne('alerts', { _id: new ObjectId(travelAlert._id) }, {
-            $set: { status: 'triggered', triggeredAt: new Date() },
-          },
-          );
-          await this.delay(Config.delay);
         }
       } catch (err) {
         console.log(err); // tslint:disable-line
@@ -114,25 +117,10 @@ class CronChecks {
   }
 
   /**
-   * select the connector that will process tgvmax availability
-   */
-  private readonly getConnector = (): IConnector => {
-    const MAX_WEIGHT: number = 100;
-    let rand: number = random(0, MAX_WEIGHT);
-    for (const connector of this.connectors) {
-      rand = rand - connector.weight;
-      if (rand <= 0) { return connector; }
-    }
-
-    return this.connectors[this.connectors.length - 1];
-  }
-
-  /**
    * fetch all pending travelAlert in database
    */
   private readonly fetchPendingTravelAlerts = async(): Promise<ITravelAlert[]> => {
     const TGVMAX_BOOKING_RANGE: number = 30;
-
     return Database.find<ITravelAlert>('alerts', {
       status: 'pending',
       fromTime: {
@@ -159,7 +147,7 @@ class CronChecks {
   private readonly delay = async(ms: number): Promise<void> => {
     type IResolve = (value?: void | PromiseLike<void> | undefined) => void;
 
-    return new Promise((resolve: IResolve): number => window.setTimeout(resolve, ms));
+    return new Promise((resolve: IResolve): NodeJS.Timeout => setTimeout(resolve, ms));
   }
 }
 

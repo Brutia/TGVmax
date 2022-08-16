@@ -1,5 +1,5 @@
 [
-  { "name": "Paris (toutes gares intramuros)", "sncfId": "FRPAR", "trainlineId": "4916" },
+  { "name": "Paris", "sncfId": "CITY_FR_6455259", "trainlineId": "69b59b70a73b72302eff45627aeef377" },
   { "name": "Lyon (toutes gares intramuros)", "sncfId": "FRLYS", "trainlineId": "4718" },
   { "name": "Bordeaux Saint-Jean", "sncfId": "FRBOJ", "trainlineId": "828" },
   { "name": "Nantes (toutes gares)", "sncfId": "FRTNE", "trainlineId": "5317" },
@@ -666,7 +666,7 @@
   },
   {
     "name": "Nancy",
-    "sncfId": "FRENC",
+    "sncfId": "RESARAIL_STA_FRENC",
     "trainlineId": "2312"
   },
   { "name": "Poix-de-Picardie", "sncfId": "FRCRH", "trainlineId": "1443" },
@@ -2256,7 +2256,7 @@
     "trainlineId": "3414"
   },
   { "name": "Buire-sur-L'Ancre", "sncfId": "FRCTL", "trainlineId": "1493" },
-  { "name": "Saint-Brieuc", "sncfId": "FRSBK", "trainlineId": "5144" },
+  { "name": "Saint-Brieuc", "sncfId": "RESARAIL_STA_FRSBK", "trainlineId": "5144" },
   { "name": "Vandières", "sncfId": "FRBQB", "trainlineId": "869" },
   { "name": "Duppigheim", "sncfId": "FRBYN", "trainlineId": "1037" },
   {
@@ -3914,7 +3914,7 @@
   { "name": "Port-de-Bouc", "sncfId": "FRPDB", "trainlineId": "4940" },
   { "name": "Chocques", "sncfId": "FRCXT", "trainlineId": "1580" },
   { "name": "Strasbourg Roethig", "sncfId": "FRBUK", "trainlineId": "938" },
-  { "name": "Strasbourg", "sncfId": "FRAEG", "trainlineId": "153" },
+  { "name": "Strasbourg", "sncfId": "CITY_FR_6441375", "trainlineId": "f0269e87c1084b4e752e4cd5bbf6e062" },
   { "name": "Schwindratzheim", "sncfId": "FRBUG", "trainlineId": "934" },
   { "name": "Valençay", "sncfId": "FREXW", "trainlineId": "2515" },
   { "name": "Ondres", "sncfId": "FRGHD", "trainlineId": "3245" },

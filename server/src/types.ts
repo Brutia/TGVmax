@@ -10,28 +10,40 @@ export interface ITrain {
 }
 
 /**
- * SncfMobile Train interface
+ * SNCF raw journey 
  */
-export interface ISncfMobileTrain {
+export interface ISncfRawJourney {
+  status:{
+    isBookable:boolean
+  }
+  travelId: string;
+  bestPriceLabel: string;
+}
+
+/**
+ * Trainline raw journey
+ */
+export interface ITrainlineRawJourney {
+  departAt: string,
+  sections: string []
+}
+
+export interface ITrainlineSection {
+  id: string,
+  alternatives: string []
+}
+
+export interface ITrainlineAlternative {
+  id: string,
+  price: {amount: number}
+}
+
+/**
+ * Journey
+ */
+ export interface IJourney {
   departureDate: string;
-  arrivalDate: string;
-  departureStation: {
-    name: string;
-  };
-  arrivalStation: {
-    name: string;
-  };
-  durationInMillis: number;
-  price: {
-    currency: string;
-    value: number;
-  };
-  segments: object[];
-  proposals: object[][];
-  connections: string[];
-  features: string[];
-  info: object;
-  unsellableReason?: string;
+  price: number;
 }
 
 /**
@@ -89,7 +101,6 @@ export interface IStation {
 export interface IConnector {
   name: string;
   isTgvmaxAvailable: any; // tslint:disable-line
-  weight: number;
 }
 
 export interface IConnectorParams {

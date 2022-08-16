@@ -9,6 +9,8 @@ const stations = require('../data/stations.json');
 
   const client = await MongoClient.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true });
 
+  client.db('maxplorateur').dropCollection('stations');
+  
   const collection = client.db('maxplorateur').collection('stations');
 
   const bulk = await collection.initializeUnorderedBulkOp();
@@ -17,13 +19,7 @@ const stations = require('../data/stations.json');
     await bulk.insert(station);
   }
 
-  console.log('ici');
-
   await bulk.execute();
 
-  console.log('ici1');
-
   await client.close();
-
-  console.log('ici2');
 })();
