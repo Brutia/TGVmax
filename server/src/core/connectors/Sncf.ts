@@ -1,4 +1,4 @@
-import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { filter, get, isEmpty, isNil, map, uniq } from 'lodash';
 import * as moment from 'moment-timezone';
 import { randomUUID } from 'crypto'
@@ -85,7 +85,7 @@ class Sncf {
           "strictMode": false,
           "directJourney": false
         });
-        const headers: AxiosRequestHeaders = Object.assign({},Config.baseHeaders);
+        const headers = Object.assign({},Config.baseHeaders);
         headers['x-bff-key'] = Config.sncfApiKey;
         headers['Cookie'] = cookiesString;
         

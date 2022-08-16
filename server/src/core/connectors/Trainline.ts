@@ -1,4 +1,4 @@
-import Axios, { AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { filter, get, isEmpty, isNil, map, uniq } from 'lodash';
 import * as moment from 'moment-timezone';
 import { randomUUID } from 'crypto'
@@ -93,7 +93,7 @@ class Trainline {
               'through'
           ]
         });
-        const headers: AxiosRequestHeaders = Object.assign({},Config.baseHeaders);
+        const headers = Object.assign({},Config.baseHeaders);
         headers['Cookie'] = cookiesString;
         headers['x-version'] = "4.6.22225";
         headers["origin"] = Config.baseTrainlineUrl;
