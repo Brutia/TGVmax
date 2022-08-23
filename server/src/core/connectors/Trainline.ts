@@ -112,8 +112,11 @@ class Trainline {
         const pageSections: ITrainlineSection[] = Object.values(response.data.data.journeySearch.sections) as unknown as ITrainlineSection[]
         const pageAlternatives: ITrainlineAlternative[] = Object.values(response.data.data.journeySearch.alternatives) as unknown as ITrainlineAlternative[]
         const pageJourneys: IJourney[] = [];
-        Object.values(rawPageJourneys).forEach((rawJourney: ITrainlineRawJourney)=>{
+        for(const rawJourney of rawPageJourneys){
           const sectionsId: string[] = rawJourney.sections;
+          if(sectionsId.length == 0){
+            continue;
+          }
           var journeyPrice: number = 0;
           sectionsId.forEach((sectionId: string) => {
             const section: ITrainlineSection | undefined = pageSections.find(element => element.id == sectionId);
@@ -133,7 +136,7 @@ class Trainline {
           const journey: IJourney = {departureDate: rawJourney.departAt,
                                       price: journeyPrice};
           pageJourneys.push(journey);
-        });
+        }
         results.push(...pageJourneys);
         var departureDate = pageJourneys[pageJourneys.length - 1].departureDate;
         const pageLastTripDeparture: string = moment(departureDate)
