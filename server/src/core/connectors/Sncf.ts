@@ -81,6 +81,7 @@ class Sncf {
           ],
           "itineraryId": randomUUID(),
           "forceDisplayResults": true,
+          "branch": "SHOP",
           "trainExpected": true,
           "strictMode": false,
           "directJourney": false
