@@ -209,8 +209,8 @@
   },
   {
     "name": "Paris Marne-la-Vallée - Chessy (Gare TGV et Ouigo, à 200m du parc Disneyland Paris, 25km de Paris)",
-    "sncfId": "FRMLV",
-    "trainlineId": "4757"
+    "sncfId": "RESARAIL_STA_FRMLV",
+    "trainlineId": "5cd546954c4dd4dd9f6e15a1598a24b1"
   },
   {
     "name": "Paris Aéroport Roissy Charles-de-Gaulle (Gare TGV et Ouigo - CDG 2, à 25 km de Paris)",
@@ -3914,7 +3914,7 @@
   { "name": "Port-de-Bouc", "sncfId": "FRPDB", "trainlineId": "4940" },
   { "name": "Chocques", "sncfId": "FRCXT", "trainlineId": "1580" },
   { "name": "Strasbourg Roethig", "sncfId": "FRBUK", "trainlineId": "938" },
-  { "name": "Strasbourg", "sncfId": "CITY_FR_6441375", "trainlineId": "f0269e87c1084b4e752e4cd5bbf6e062" },
+  { "name": "Strasbourg", "sncfId": "RESARAIL_STA_FRAEG", "trainlineId": "f0269e87c1084b4e752e4cd5bbf6e062" },
   { "name": "Schwindratzheim", "sncfId": "FRBUG", "trainlineId": "934" },
   { "name": "Valençay", "sncfId": "FREXW", "trainlineId": "2515" },
   { "name": "Ondres", "sncfId": "FRGHD", "trainlineId": "3245" },
